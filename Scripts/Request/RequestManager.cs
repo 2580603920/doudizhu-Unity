@@ -17,7 +17,7 @@ namespace Doudizhu
         Message message;
         Dictionary<ActionCode , RequestBase> allRequest;
         static RequestManager instance;
-        string ip = "2.tcp.cpolar.top";
+        string ip = "1.tcp.cpolar.top";
         
 
         public string curRoomID;
@@ -117,7 +117,7 @@ namespace Doudizhu
                socket = new Socket(AddressFamily.InterNetwork , SocketType.Stream , ProtocolType.Tcp);
                //remoteIP = new IPEndPoint(IPAddress.Parse(ip) , 8888);
                
-               remoteIP = new IPEndPoint(entry.AddressList[0],11158); 
+               remoteIP = new IPEndPoint(entry.AddressList[0], 30908); 
                try
                {
                    socket.Connect(remoteIP);

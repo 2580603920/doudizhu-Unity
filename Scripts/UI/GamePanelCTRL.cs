@@ -33,7 +33,7 @@ namespace Doudizhu
 
         
 
-        List<Transform> sendPokersTrans;
+        List<RectTransform> sendPokersTrans;
         EventSystem eventSystem;
         GraphicRaycaster graphicRaycaster;
         PointerEventData pointerEventData;
@@ -59,11 +59,11 @@ namespace Doudizhu
                     {
                         if ( sendPokersTrans.Contains(tmepList[0].gameObject.transform) )
                         {
-                            CancelSelectPoker(tmepList[0].gameObject.transform);
+                            CancelSelectPoker(tmepList[0].gameObject.transform as RectTransform);
                         }
                         else 
                         {
-                            SelectPoker(tmepList[0].gameObject.transform);
+                            SelectPoker(tmepList[0].gameObject.transform as RectTransform);
                         }
                     
                     }
@@ -72,14 +72,15 @@ namespace Doudizhu
 
 
         }
-        void SelectPoker(Transform pokerTrans) 
+        void SelectPoker(RectTransform pokerTrans) 
         {
-            pokerTrans.DOLocalMoveY(20.0f , 0.6f);          
+           
+            pokerTrans.DOAnchorPosY((-pokerTrans.sizeDelta.y / 2)+20 , 0.3f);          
             sendPokersTrans.Add(pokerTrans);
         }
-        void CancelSelectPoker( Transform pokerTrans  )
+        void CancelSelectPoker( RectTransform pokerTrans  )
         {
-            pokerTrans.DOLocalMoveY(0 , 0.6f);          
+            pokerTrans.DOAnchorPosY(-pokerTrans.sizeDelta.y / 2 , 0.3f);          
             sendPokersTrans.Remove(pokerTrans);
         }
         //取消选择的所有选中的牌
@@ -140,7 +141,7 @@ namespace Doudizhu
         //初始化面板
         void InitialPanel( ) 
         {
-            sendPokersTrans = new List<Transform>();
+            sendPokersTrans = new List<RectTransform>();
             dealer = new Dealer();
             ShowdizhuFlag = false;
             transform.parent.gameObject.SetActive(true);
@@ -506,16 +507,20 @@ namespace Doudizhu
                         {
                             Loom.QueueOnMainThread(( a ) =>
                             {
-                                if ( pack.Gameinfo.Curusername == pack.Gameinfo.Dizhu && pack.Gameinfo.Dizhu == RequestManager.Instance.username )
+                                if ( pack.Gameinfo.Curusername == pack.Gameinfo.Dizhu)
                                 {
+                                    if ( pack.Gameinfo.Dizhu == RequestManager.Instance.username )
+                                        ShowMessage("游戏胜利");
+                                    else
+                                        ShowMessage("游戏失败");
 
-                                    ShowMessage("游戏胜利");
-                                    
-                                   
                                 }
                                 else 
                                 {
-                                    ShowMessage("游戏失败");
+                                    if ( pack.Gameinfo.Dizhu == RequestManager.Instance.username )
+                                        ShowMessage("游戏失败");
+                                    else
+                                        ShowMessage("游戏胜利");
 
                                 }
                                 Invoke("InitialPanel" , 0.8f);
@@ -559,13 +564,17 @@ namespace Doudizhu
 
                             }
                             int i = 0;
+                            
                             foreach ( var poker in item.Poker )
                             {
-                                Transform temp = LoadUI("SmallPoker" , GetUITrans("Player1SendPokers_N"));
+                                RectTransform temp = LoadUI("SmallPoker" , GetUITrans("Player1SendPokers_N")) as RectTransform;
+
+                                float posX = -( temp.sizeDelta.x / 2 ) - ( ( temp.parent as RectTransform ).sizeDelta.x - ( temp.sizeDelta.x + ( item.Poker.Count - 1 ) * 15 ) ) / 2 - 15 * i;
+
                                 temp.name = GetPokerSprite(poker.Weight , poker.Pokercolor).name;
                                 temp.GetComponent<Image>().sprite = GetPokerSprite(poker.Weight , poker.Pokercolor);
-                                temp.localPosition = new Vector3(-30 + 10 * i , 0 , 0);
-                                temp.SetAsLastSibling();
+                                temp.anchoredPosition = new Vector3(posX , -temp.sizeDelta.y/2 , 0);
+                                temp.SetAsFirstSibling();
                                 i++;
                             }
                             GetUITrans("Player1SendPokers_N").gameObject.SetActive(true);
@@ -588,11 +597,12 @@ namespace Doudizhu
                             int i = 0;
                             foreach ( var poker in item.Poker )
                             {
-                                Transform temp = LoadUI("SmallPoker" , tempT);
+                                RectTransform temp = LoadUI("SmallPoker" , tempT) as RectTransform;
+                                float posX = -( temp.sizeDelta.x / 2 ) - ( ( temp.parent as RectTransform ).sizeDelta.x - ( temp.sizeDelta.x + ( item.Poker.Count - 1 ) * 15 ) ) / 2 - 15 * i;
                                 temp.name = GetPokerSprite(poker.Weight , poker.Pokercolor).name;
                                 temp.GetComponent<Image>().sprite = GetPokerSprite(poker.Weight , poker.Pokercolor);
-                                temp.localPosition = new Vector3(20 + 10 * i , 0 , 0);
-                                temp.SetAsLastSibling();
+                                temp.anchoredPosition = new Vector3(posX , -temp.sizeDelta.y / 2 , 0);
+                                temp.SetAsFirstSibling();
                                 i++;
                             }
                             tempT.gameObject.SetActive(true);
@@ -613,10 +623,11 @@ namespace Doudizhu
                             int i = 0;
                             foreach ( var poker in item.Poker )
                             {
-                                Transform temp = LoadUI("SmallPoker" , tempT);
+                                RectTransform temp = LoadUI("SmallPoker" , tempT) as RectTransform;
+                                float posX = -( temp.sizeDelta.x / 2 ) - ( ( temp.parent as RectTransform ).sizeDelta.x - ( temp.sizeDelta.x + ( item.Poker.Count - 1 ) * 15 ) ) / 2 - 15 * i;
                                 temp.name = GetPokerSprite(poker.Weight , poker.Pokercolor).name;
                                 temp.GetComponent<Image>().sprite = GetPokerSprite(poker.Weight , poker.Pokercolor);
-                                temp.localPosition = new Vector3(-33 -10 * i , 0 , 0);
+                                temp.anchoredPosition = new Vector3(posX , -temp.sizeDelta.y / 2 , 0);
                                 temp.SetAsFirstSibling();
                                 i++;
                             }
@@ -666,8 +677,6 @@ namespace Doudizhu
                     //为自己渲染手牌
                     if ( info.Username == RequestManager.Instance.username )
                     {
-                       
-                       
                             foreach (var item in GetUITrans("Player1Pokers_N").GetComponentsInChildren<Transform>()) 
                             {
                                 if ( item.name != "Player1Pokers_N" ) 
@@ -686,10 +695,13 @@ namespace Doudizhu
                         int i = 0;
                         foreach ( var item in info.Poker )
                         {
-                            Transform temp = LoadUI("BigPorker" , GetUITrans("Player1Pokers_N"));
+                            RectTransform temp = LoadUI("BigPorker" , GetUITrans("Player1Pokers_N")) as RectTransform;
+
+                            float posX = -(temp.sizeDelta.x / 2) - (( temp.parent as RectTransform ).sizeDelta.x -( temp.sizeDelta.x  + (info.Poker.Count-1)*25 ) ) / 2  - 25 * i;
+
                             temp.name = GetPokerSprite(item.Weight , item.Pokercolor).name;
                             temp.GetComponent<Image>().sprite = GetPokerSprite(item.Weight , item.Pokercolor);
-                            temp.localPosition = new Vector3(245 - 25 * i , 0 , 0);
+                            temp.anchoredPosition = new Vector3(posX , -temp.sizeDelta.y/2 , 0);
                             temp.SetAsFirstSibling();
                             i++;
                         }
